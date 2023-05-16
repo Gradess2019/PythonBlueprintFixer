@@ -1,24 +1,27 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.0",
-	"FriendlyName": "PythonBlueprintFixer",
-	"Description": "",
-	"Category": "Other",
+	"VersionName": "1.0.0",
+	"FriendlyName": "Python Blueprint Fixer",
+	"Description": "The plugin edits loading phase of python scripts so the blueprints will compile properly on editor startup.",
+	"Category": "Editor",
 	"CreatedBy": "Gradess Games",
 	"CreatedByURL": "https://stepantrofimov.com",
 	"DocsURL": "",
 	"MarketplaceURL": "",
-	"SupportURL": "",
-	"CanContainContent": true,
-	"IsBetaVersion": true,
+	"SupportURL": "https://discord.gg/zFK38y68tK",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
 	"Modules": [
 		{
 			"Name": "PythonBlueprintFixer",
 			"Type": "Editor",
-			"LoadingPhase": "PostEngineInit"
+			"LoadingPhase": "PostEngineInit",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
 		}
 	],
 	"Plugins": [
