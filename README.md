@@ -1,7 +1,7 @@
 # Python Blueprint Fixer
 
 ## Description
-Simple plugin that fixes Unreal Engine python scripts loading phase that causes blueprint compilation errors.
+Simple plugin that fixes Unreal Engine python scripts loading phase that causes blueprint compilation errors. Especially it helps if you use a lot of Editor Utility Widgets that uses python scripts and are opened on engine startup.
 
 ## How to install
 1. Download [latest release](https://github.com/Gradess2019/PythonBlueprintFixer/releases/latest) for your Unreal Engine version
