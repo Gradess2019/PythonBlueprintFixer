@@ -11,6 +11,8 @@
 void FPythonBlueprintFixerModule::StartupModule()
 {
 	RegisterSettings();
+	
+	CleaStartupScriptsInPythonPlugin();
 	RunStartupScripts();
 }
 
@@ -36,6 +38,17 @@ void FPythonBlueprintFixerModule::UnregisterSettings() const
 	{
 		SettingsModule->UnregisterSettings(TEXT("Project"), TEXT("Plugins"), TEXT("PythonBlueprintFixer"));
 	}
+}
+
+void FPythonBlueprintFixerModule::CleaStartupScriptsInPythonPlugin() const
+{
+	const auto PythonSettings = StaticFindObject(UObject::StaticClass(), nullptr, TEXT("/Script/PythonScriptPlugin.Default__PythonScriptPluginSettings"));
+	checkf(PythonSettings, TEXT("UPythonScriptPluginSettings default object not found"));
+
+	const auto StartupScriptsField = PythonSettings->GetClass()->FindPropertyByName(TEXT("StartupScripts"));
+	checkf(StartupScriptsField, TEXT("StartupScripts field not found in PythonSettings"));
+
+	StartupScriptsField->ClearValue_InContainer(PythonSettings);
 }
 
 void FPythonBlueprintFixerModule::RunStartupScripts() const

@@ -17,5 +17,6 @@ private:
 	void RegisterSettings() const;
 	void UnregisterSettings() const;
 
+	void CleaStartupScriptsInPythonPlugin() const;
 	void RunStartupScripts() const;
 };
