@@ -8,15 +8,20 @@
 class FPythonBlueprintFixerModule : public IModuleInterface
 {
 public:
+	TArray<FString> StartupScripts;
+	FTSTicker::FDelegateHandle ModuleDelayedHandle;
 
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
 private:
-	void RegisterSettings() const;
-	void UnregisterSettings() const;
-
-	void CleaStartupScriptsInPythonPlugin() const;
+	TObjectPtr<UObject> GetPythonSettings() const;
+	FProperty* GetStratupScriptArrayProperty(TObjectPtr<UObject> PythonSettings) const;
+	
+	void CopyStartupScriptsFromPlugin();
 	void RunStartupScripts() const;
+
+	bool OnTick(float InDeltaTime);
+	void SetStartupScriptsBack() const;
 };

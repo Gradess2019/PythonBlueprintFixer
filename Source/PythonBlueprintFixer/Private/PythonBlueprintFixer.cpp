@@ -1,62 +1,57 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "PythonBlueprintFixer.h"
-
 #include "IPythonScriptPlugin.h"
-#include "ISettingsModule.h"
-#include "PythonBlueprintFixerSettings.h"
 
 #define LOCTEXT_NAMESPACE "FPythonBlueprintFixerModule"
 
 void FPythonBlueprintFixerModule::StartupModule()
 {
-	RegisterSettings();
-	
-	CleaStartupScriptsInPythonPlugin();
+	CopyStartupScriptsFromPlugin();
 	RunStartupScripts();
 }
 
 void FPythonBlueprintFixerModule::ShutdownModule()
 {
-	UnregisterSettings();
 }
 
-void FPythonBlueprintFixerModule::RegisterSettings() const
+TObjectPtr<UObject> FPythonBlueprintFixerModule::GetPythonSettings() const
 {
-	auto& SettingsModule = FModuleManager::GetModuleChecked<ISettingsModule>("Settings");
-	SettingsModule.RegisterSettings(
-		TEXT("Project"), TEXT("Plugins"), TEXT("Python Blueprint Fixer"),
-		LOCTEXT("PythonBlueprintFixerSettingsName", "Python Blueprint Fixer"),
-		LOCTEXT("PythonBlueprintFixerDescription", "Configure PythonBlueprintFixer plugin"),
-		GetMutableDefault<UPythonBlueprintFixerSettings>()
-	);
+	const auto CDOName = TEXT("/Script/PythonScriptPlugin.Default__PythonScriptPluginSettings");
+	return StaticFindObject(UObject::StaticClass(), nullptr, CDOName);
 }
 
-void FPythonBlueprintFixerModule::UnregisterSettings() const
+FProperty* FPythonBlueprintFixerModule::GetStratupScriptArrayProperty(TObjectPtr<UObject> PythonSettings) const
 {
-	if (const auto SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
-	{
-		SettingsModule->UnregisterSettings(TEXT("Project"), TEXT("Plugins"), TEXT("PythonBlueprintFixer"));
-	}
-}
-
-void FPythonBlueprintFixerModule::CleaStartupScriptsInPythonPlugin() const
-{
-	const auto PythonSettings = StaticFindObject(UObject::StaticClass(), nullptr, TEXT("/Script/PythonScriptPlugin.Default__PythonScriptPluginSettings"));
 	checkf(PythonSettings, TEXT("UPythonScriptPluginSettings default object not found"));
+	return PythonSettings->GetClass()->FindPropertyByName(TEXT("StartupScripts"));
+}
 
-	const auto StartupScriptsField = PythonSettings->GetClass()->FindPropertyByName(TEXT("StartupScripts"));
+void FPythonBlueprintFixerModule::CopyStartupScriptsFromPlugin()
+{
+	const auto PythonSettings = GetPythonSettings();
+	const auto StartupScriptsField = GetStratupScriptArrayProperty(PythonSettings);
+	checkf(StartupScriptsField, TEXT("StartupScripts field not found in PythonSettings"));
+	
+	StartupScriptsField->GetValue_InContainer(PythonSettings, &StartupScripts);
+	StartupScriptsField->ClearValue_InContainer(PythonSettings);
+
+	constexpr auto Delay = 1.f;
+	ModuleDelayedHandle = FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &FPythonBlueprintFixerModule::OnTick), Delay);
+}
+
+void FPythonBlueprintFixerModule::SetStartupScriptsBack() const
+{
+	const auto PythonSettings = GetPythonSettings();
+	const auto StartupScriptsField = GetStratupScriptArrayProperty(PythonSettings);
 	checkf(StartupScriptsField, TEXT("StartupScripts field not found in PythonSettings"));
 
-	StartupScriptsField->ClearValue_InContainer(PythonSettings);
+	StartupScriptsField->SetValue_InContainer(PythonSettings, &StartupScripts);
 }
 
 void FPythonBlueprintFixerModule::RunStartupScripts() const
 {
 	auto& PythonModule = FModuleManager::LoadModuleChecked<IPythonScriptPlugin>("PythonScriptPlugin");
-	
-	const auto Settings = GetDefault<UPythonBlueprintFixerSettings>();
-	const auto StartupScripts = Settings->StartupScripts;
 
 	for (const auto& StartupScript : StartupScripts)
 	{
@@ -64,6 +59,15 @@ void FPythonBlueprintFixerModule::RunStartupScripts() const
 	}
 }
 
+bool FPythonBlueprintFixerModule::OnTick(float InDeltaTime)
+{
+	ModuleDelayedHandle.Reset();
+
+	SetStartupScriptsBack();
+
+	return false;
+}
+
 #undef LOCTEXT_NAMESPACE
-	
+
 IMPLEMENT_MODULE(FPythonBlueprintFixerModule, PythonBlueprintFixer)
