@@ -12,4 +12,5 @@ Simple plugin that fixes Unreal Engine python scripts loading phase that causes 
 7. Done
 
 ## How to use
+Add your python scripts to Startup Scripts in project settings [as you usually do](https://docs.unrealengine.com/4.27/en-US/ProductionPipelines/ScriptingAndAutomation/Python/#startupscripts).
 The plugin will start its work automatically. No additional steps required. Enjoy!
