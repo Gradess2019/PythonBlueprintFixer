@@ -37,7 +37,8 @@ public class PythonBlueprintFixer : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore",
+				"SlateCore", 
+				"PythonScriptPlugin",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

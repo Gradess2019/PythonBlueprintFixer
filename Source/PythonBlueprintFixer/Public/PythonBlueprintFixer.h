@@ -12,4 +12,10 @@ public:
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+
+private:
+	void RegisterSettings() const;
+	void UnregisterSettings() const;
+
+	void RunStartupScripts() const;
 };
